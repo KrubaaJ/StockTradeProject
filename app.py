@@ -41,6 +41,19 @@ start_date = end_date - timedelta(days=180)  # Default to 6 months of data
 start_date_input = st.sidebar.date_input("Start Date", value=start_date)
 end_date_input = st.sidebar.date_input("End Date", value=end_date)
 
+def analyze_gaps(df, threshold): 
+    if df is not None and not df.empty:  # Ensure df exists and is not empty
+        df['prev_close'] = df['Close'].shift(1)
+        df['prev_close'].fillna(df['Open'], inplace=True)  # Handle missing values
+        df['gap_percent'] = ((df['Open'] - df['prev_close']) / df['prev_close']) * 100
+        df['gap_percent'] = df['gap_percent'].astype(float)
+        df['has_gap'] = abs(df['gap_percent']) > threshold
+        df['gap_type'] = 'none'
+        df.loc[df['gap_percent'] > threshold, 'gap_type'] = '⬆️ Up Gap'
+        df.loc[df['gap_percent'] < -threshold, 'gap_type'] = '⬇️ Down Gap'
+        return df
+    else:
+        return pd.DataFrame()  # Return empty DataFrame if no data available
 gap_threshold = st.sidebar.slider("Gap Threshold (%)", min_value=0.5, max_value=10.0, value=2.0, step=0.5)
 df['gap_percent'] = ((df['Open'] - df['prev_close']) / df['prev_close']) * 100
 df['gap_percent'] = df['gap_percent'].astype(float)  # Ensure it's a single numeric column
