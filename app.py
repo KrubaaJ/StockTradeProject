@@ -5,6 +5,30 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Stock Trade Gap Analysis", layout="wide")
+st.markdown(
+    """
+    <style>
+    .reportview-container {
+        background: #f8f9fa;
+    }
+    .sidebar .sidebar-content {
+        background: #dee2e6;
+    }
+    .stButton>button {
+        background-color: #008CBA;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        padding: 8px 16px;
+    }
+    .stSlider>div[role='slider'] {
+        background-color: #008CBA;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.title("📈 Stock Trade Gap Analysis")
 
 # Sidebar for inputs
@@ -18,6 +42,8 @@ start_date_input = st.sidebar.date_input("Start Date", value=start_date)
 end_date_input = st.sidebar.date_input("End Date", value=end_date)
 
 gap_threshold = st.sidebar.slider("Gap Threshold (%)", min_value=0.5, max_value=10.0, value=2.0, step=0.5)
+df['gap_percent'] = ((df['Open'] - df['prev_close']) / df['prev_close']) * 100
+df['gap_percent'] = df['gap_percent'].astype(float)  # Ensure it's a single numeric column
 
 # Function to analyze gaps
 def analyze_gaps(df, threshold):
